@@ -27,7 +27,8 @@ const MultiplayerGame = () => {
   // Connexion Socket.IO
   const connectToServer = useCallback(() => {
     const BACKEND_PORT = process.env.BACKEND_PORT || 5000;
-    const newSocket = io(`localhost:${BACKEND_PORT | 5000}`, {
+    const BACKEND_HOSTNAME = process.env.BACKEND_HOSTNAME || "37.187.155.25";
+    const newSocket = io(`${BACKEND_HOSTNAME}:${BACKEND_PORT | 5000}`, {
       transports: ["websocket"],
     });
 
