@@ -1,0 +1,42 @@
+---
+- name: Deploy Swords Line Web Application
+  hosts: all
+  become: true
+  tasks:
+    - name: Install Docker dependencies
+      apt:
+        name:
+          - apt-transport-https
+          - ca-certificates
+          - curl
+          - software-properties-common
+        state: present
+        update_cache: yes
+
+    - name: Install Docker
+      apt:
+        name: docker.io
+        state: present
+
+    - name: Install Docker Compose
+      apt:
+        name: docker-compose
+        state: present
+
+    - name: Install git
+      apt:
+        name: git
+        state: present
+
+    - name: Clone project repository
+      git:
+        repo: https://github.com/raphael-pietrzak/swords-line-web.git
+        dest: /opt/swords-line-web
+        clone: yes
+        update: yes
+
+    - name: Start Docker containers
+      command: docker-compose up -d
+      args:
+        chdir: /opt/swords-line-web
+

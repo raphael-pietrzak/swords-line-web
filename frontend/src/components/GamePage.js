@@ -3,8 +3,11 @@ import Character from './Character';
 import GameControls from './GameControls';
 import PlayerList from './PlayerList';
 
-const GamePage = ({ roomId, gameState, currentPlayer, keys, onLeaveRoom }) => {
+const GamePage = ({ roomId, gameState, keys, onLeaveRoom }) => {
   // Calculer la position de la caméra centrée sur le joueur
+
+  const currentPlayer = gameState.players[gameState.currentPlayerId];
+
   const getCameraTransform = () => {
     if (!currentPlayer) return 'translate(0, 0)';
     
@@ -17,7 +20,6 @@ const GamePage = ({ roomId, gameState, currentPlayer, keys, onLeaveRoom }) => {
     return `translate(${offsetX}px, ${offsetY}px)`;
   };
 
-  console.log('Current player:', currentPlayer);
 
 
   return (
