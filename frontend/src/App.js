@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef, use } from 'react';
 import io from 'socket.io-client';
 import ConnectionPage from './components/ConnectionPage';
 import LobbyPage from './components/LobbyPage';
@@ -19,6 +19,10 @@ const MultiplayerGame = () => {
   
   const lastUpdateRef = useRef(Date.now());
   const playerPositionRef = useRef({ x: 0, y: 0 });
+
+  useEffect(() => {
+    console.log(currentPlayer);
+  }, [currentPlayer]);
 
   // Connexion Socket.IO
   const connectToServer = useCallback(() => {
@@ -60,7 +64,7 @@ const MultiplayerGame = () => {
     return () => {
       newSocket.disconnect();
     };
-  }, []);
+  }, [currentPlayer]);
 
   // Rejoindre une room
   const joinRoom = () => {
@@ -132,55 +136,16 @@ const MultiplayerGame = () => {
       const now = Date.now();
       if (now - lastUpdateRef.current < 16) return;
 
-      let newX = playerPositionRef.current.x;
-      let newY = playerPositionRef.current.y;
-      let direction = currentPlayer.direction || 'right';
-      let isMoving = false;
-      const speed = 5;
-
-      if (keys['q']) {
-        newX -= speed;
-        direction = 'left';
-        isMoving = true;
-      }
-      if (keys['d']) {
-        newX += speed;
-        direction = 'right';
-        isMoving = true;
-      }
-      if (keys['z']) {
-        newY -= speed;
-        isMoving = true;
-      }
-      if (keys['s']) {
-        newY += speed;
-        isMoving = true;
-      }
-
-      if (newX !== playerPositionRef.current.x || 
-          newY !== playerPositionRef.current.y || 
-          isMoving !== currentPlayer.isMoving ||
-          direction !== currentPlayer.direction) {
-        
-        playerPositionRef.current = { x: newX, y: newY };
-        
-        socket.emit('playerUpdate', {
-          x: newX,
-          y: newY,
-          direction,
-          isMoving,
-          isAttacking
-        });
-
-        setCurrentPlayer(prev => ({
-          ...prev,
-          x: newX,
-          y: newY,
-          direction,
-          isMoving,
-          isAttacking
-        }));
-      }
+      // Envoyer uniquement l'état des touches au serveur
+      socket.emit('playerUpdate', {
+        keys: {
+          up: keys['z'] || false,
+          down: keys['s'] || false,
+          left: keys['q'] || false,
+          right: keys['d'] || false
+        },
+        isAttacking
+      });
 
       lastUpdateRef.current = now;
     }, 16);

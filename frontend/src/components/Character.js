@@ -1,8 +1,12 @@
 import React from 'react';
 import { useCharacterAnimation } from '../hooks/useCharacterAnimation';
+import assets from '../data/assets';
 
 const Character = ({ player, isCurrentPlayer }) => {
   const animationFrame = useCharacterAnimation(player.isMoving, player.isAttacking);
+  
+  // Utiliser les assets du personnage "torch"
+  const characterAsset = assets.torch;
 
   const getAnimationState = () => {
     if (player.isAttacking) return 'attack';
@@ -10,17 +14,11 @@ const Character = ({ player, isCurrentPlayer }) => {
     return 'idle';
   };
 
-  const animations = {
-    idle: { row: 0, frames: 7, frameWidth: 192, frameHeight: 192 },
-    walk: { row: 1, frames: 6, frameWidth: 192, frameHeight: 192 },
-    attack: { row: 2, frames: 6, frameWidth: 192, frameHeight: 192 }
-  };
-
   const currentAnim = getAnimationState();
-  const animConfig = animations[currentAnim];
+  const animConfig = characterAsset.animations[currentAnim];
   
-  const spriteX = -((animationFrame % animConfig.frames) * animConfig.frameWidth);
-  const spriteY = -(animConfig.row * animConfig.frameHeight);
+  const spriteX = -((animationFrame % animConfig.frames) * characterAsset.frameWidth);
+  const spriteY = -(animConfig.row * characterAsset.frameHeight);
 
   const characterStyle = {
     left: `${player.x}px`,
@@ -30,9 +28,9 @@ const Character = ({ player, isCurrentPlayer }) => {
   };
 
   const spriteStyle = {
-    width: `${animConfig.frameWidth}px`,
-    height: `${animConfig.frameHeight}px`,
-    backgroundImage: `url('/sprites/Torch.png')`,
+    width: `${characterAsset.frameWidth}px`,
+    height: `${characterAsset.frameHeight}px`,
+    backgroundImage: `url('${characterAsset.image}')`,
     backgroundPosition: `${spriteX}px ${spriteY}px`,
     backgroundRepeat: 'no-repeat',
     imageRendering: 'pixelated',

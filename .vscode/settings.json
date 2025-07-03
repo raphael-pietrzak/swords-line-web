@@ -3,11 +3,11 @@
         "**/.git": true,
         "**/.svn": true,
         "**/.hg": true,
-        "**/CVS": true,
         "**/.DS_Store": true,
         "**/Thumbs.db": true,
         ".vscode": true,
-        "**/__pycache__": true
+        "**/__pycache__": true,
+        "**/CVS": true
     },
     "hide-files.files": []
 }

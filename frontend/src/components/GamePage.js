@@ -17,6 +17,9 @@ const GamePage = ({ roomId, gameState, currentPlayer, keys, onLeaveRoom }) => {
     return `translate(${offsetX}px, ${offsetY}px)`;
   };
 
+  console.log('Current player:', currentPlayer);
+
+
   return (
     <div className="fixed inset-0 bg-gradient-to-br from-slate-900 via-gray-900 to-zinc-900">
       {/* Map en fullscreen */}
@@ -86,7 +89,7 @@ const GamePage = ({ roomId, gameState, currentPlayer, keys, onLeaveRoom }) => {
             onClick={onLeaveRoom}
             className="bg-red-500/20 border border-red-500/50 text-red-400 px-6 py-3 rounded-xl hover:bg-red-500/30 transition-all duration-300 backdrop-blur-sm font-semibold"
           >
-            🚪 Quitter
+            Quitter
           </button>
         </div>
       </div>
@@ -101,7 +104,7 @@ const GamePage = ({ roomId, gameState, currentPlayer, keys, onLeaveRoom }) => {
 
       {/* Contrôles en overlay */}
       <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 z-30">
-        <GameControls keys={keys} currentPlayer={currentPlayer} />
+        <GameControls keys={keys} currentPlayer={gameState.players[currentPlayer?.id]} />
       </div>
     </div>
   );

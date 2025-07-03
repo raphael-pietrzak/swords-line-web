@@ -76,26 +76,38 @@ class GameRoom {
 
   updatePlayer(socketId, updateData) {
     if (this.players[socketId]) {
-      // Validation des données
       const player = this.players[socketId];
-      
-      if (typeof updateData.x === 'number') {
-        player.x = updateData.x;
+      const speed = 5;
+      const keys = updateData.keys;
+
+      // Mise à jour de la position basée sur les touches
+      if (keys.left) {
+        player.x -= speed;
+        player.direction = 'left';
+        player.isMoving = true;
       }
-      if (typeof updateData.y === 'number') {
-        player.y = updateData.y;
+      if (keys.right) {
+        player.x += speed;
+        player.direction = 'right';
+        player.isMoving = true;
       }
-      if (updateData.direction === 'left' || updateData.direction === 'right') {
-        player.direction = updateData.direction;
+      if (keys.up) {
+        player.y -= speed;
+        player.isMoving = true;
       }
-      if (typeof updateData.isMoving === 'boolean') {
-        player.isMoving = updateData.isMoving;
+      if (keys.down) {
+        player.y += speed;
+        player.isMoving = true;
       }
+
+      // Si aucune touche de mouvement n'est pressée
+      if (!keys.left && !keys.right && !keys.up && !keys.down) {
+        player.isMoving = false;
+      }
+
+      // Mettre à jour l'état d'attaque
       if (typeof updateData.isAttacking === 'boolean') {
         player.isAttacking = updateData.isAttacking;
-      }
-      if (typeof updateData.animationFrame === 'number') {
-        player.animationFrame = updateData.animationFrame % 6;
       }
       
       this.broadcastGameState();
@@ -260,28 +272,6 @@ io.on('connection', (socket) => {
     console.error(`Erreur socket ${socket.id}:`, error);
   });
 });
-
-// Boucle de jeu côté serveur (pour les animations)
-setInterval(() => {
-  for (const roomId in gameState.rooms) {
-    const room = gameState.rooms[roomId];
-    let hasMovingPlayers = false;
-    
-    // Mettre à jour les animations des joueurs qui bougent
-    for (const playerId in room.players) {
-      const player = room.players[playerId];
-      if (player.isMoving) {
-        player.animationFrame = (player.animationFrame + 1) % 6;
-        hasMovingPlayers = true;
-      }
-    }
-    
-    // Broadcast seulement s'il y a des changements
-    if (hasMovingPlayers) {
-      room.broadcastGameState();
-    }
-  }
-}, 150); // Animation toutes les 150ms
 
 // Route API pour les statistiques
 app.get('/api/stats', (req, res) => {
