@@ -1,27 +1,18 @@
 services:
   backend:
-    container_name: backend
     build:
       context: ./backend
-      dockerfile: Dockerfile
+    container_name: backend
     ports:
-      - "3001:3001"
-    volumes:
-      - ./backend:/app
-      - ./backend/node_modules:/app/node_modules
-    environment:
-      - NODE_ENV=production
+      - "5000:5000"
+    restart: unless-stopped
 
   frontend:
-    container_name: frontend
     build:
       context: ./frontend
-      dockerfile: Dockerfile
+    container_name: frontend
     ports:
-      - "5000:3000"
-    volumes:
-      - ./frontend:/app
-      - ./frontend/node_modules:/app/node_modules
-    environment:
-      - NODE_ENV=production
-
+      - "3000:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
