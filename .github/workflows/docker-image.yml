@@ -78,5 +78,5 @@ jobs:
           script: |
             cd /home/swords-line-web
             docker login ghcr.io -u ${{ github.actor }} -p ${{ secrets.CR_PAT }}
-            docker compose pull
-            docker compose up -d
+            sudo docker compose pull
+            sudo docker compose up -d
