@@ -1,22 +1,22 @@
-import React, { useState, useEffect, useCallback, useRef, use } from 'react';
-import io from 'socket.io-client';
-import ConnectionPage from './components/ConnectionPage';
-import LobbyPage from './components/LobbyPage';
-import GamePage from './components/GamePage';
+import React, { useState, useEffect, useCallback, useRef, use } from "react";
+import io from "socket.io-client";
+import ConnectionPage from "./components/ConnectionPage";
+import LobbyPage from "./components/LobbyPage";
+import GamePage from "./components/GamePage";
 
 const MultiplayerGame = () => {
   const [socket, setSocket] = useState(null);
   const [connected, setConnected] = useState(false);
   const [gameState, setGameState] = useState({ players: {} });
   const [currentPlayer, setCurrentPlayer] = useState(null);
-  const [roomId, setRoomId] = useState('');
-  const [playerName, setPlayerName] = useState('');
+  const [roomId, setRoomId] = useState("");
+  const [playerName, setPlayerName] = useState("");
   const [joinedRoom, setJoinedRoom] = useState(false);
   const [keys, setKeys] = useState({});
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const [rooms, setRooms] = useState([]);
   const [isAttacking, setIsAttacking] = useState(false);
-  
+
   const lastUpdateRef = useRef(Date.now());
   const playerPositionRef = useRef({ x: 0, y: 0 });
 
@@ -26,36 +26,37 @@ const MultiplayerGame = () => {
 
   // Connexion Socket.IO
   const connectToServer = useCallback(() => {
-    const newSocket = io('http://localhost:3001', {
-      transports: ['websocket']
+    const BACKEND_PORT = process.env.BACKEND_PORT || 5000;
+    const newSocket = io(`localhost:${BACKEND_PORT | 5000}`, {
+      transports: ["websocket"],
     });
 
-    newSocket.on('connect', () => {
-      console.log('Connecté au serveur');
+    newSocket.on("connect", () => {
+      console.log("Connecté au serveur");
       setConnected(true);
-      setError('');
+      setError("");
     });
 
-    newSocket.on('disconnect', () => {
-      console.log('Déconnecté du serveur');
+    newSocket.on("disconnect", () => {
+      console.log("Déconnecté du serveur");
       setConnected(false);
       setJoinedRoom(false);
     });
 
-    newSocket.on('playerJoined', (data) => {
+    newSocket.on("playerJoined", (data) => {
       setCurrentPlayer(data.playerData);
       setJoinedRoom(true);
     });
 
-    newSocket.on('gameUpdate', (update) => {
+    newSocket.on("gameUpdate", (update) => {
       setGameState(update);
     });
 
-    newSocket.on('roomsList', (roomsList) => {
+    newSocket.on("roomsList", (roomsList) => {
       setRooms(roomsList);
     });
 
-    newSocket.on('error', (errorData) => {
+    newSocket.on("error", (errorData) => {
       setError(errorData.message);
     });
 
@@ -69,14 +70,14 @@ const MultiplayerGame = () => {
   // Rejoindre une room
   const joinRoom = () => {
     if (!roomId.trim() || !playerName.trim()) {
-      setError('Nom du joueur et ID de room requis');
+      setError("Nom du joueur et ID de room requis");
       return;
     }
 
     if (socket) {
-      socket.emit('joinRoom', {
+      socket.emit("joinRoom", {
         roomId: roomId.trim(),
-        playerName: playerName.trim()
+        playerName: playerName.trim(),
       });
     }
   };
@@ -84,47 +85,50 @@ const MultiplayerGame = () => {
   // Obtenir la liste des rooms
   const getRooms = () => {
     if (socket) {
-      socket.emit('getRooms');
+      socket.emit("getRooms");
     }
   };
 
   // Quitter la room
   const leaveRoom = () => {
     setJoinedRoom(false);
-    setRoomId('');
-    setPlayerName('');
+    setRoomId("");
+    setPlayerName("");
     setCurrentPlayer(null);
     setGameState({ players: {} });
   };
 
   // Gestion des touches
-  const handleKeyDown = useCallback((e) => {
-    const key = e.key.toLowerCase();
-    setKeys(prev => ({ ...prev, [key]: true }));
-    
-    if (key === ' ' && !isAttacking) {
-      setIsAttacking(true);
-      if (socket && currentPlayer) {
-        socket.emit('playerAttack', {
-          x: currentPlayer.x,
-          y: currentPlayer.y,
-          direction: currentPlayer.direction
-        });
+  const handleKeyDown = useCallback(
+    (e) => {
+      const key = e.key.toLowerCase();
+      setKeys((prev) => ({ ...prev, [key]: true }));
+
+      if (key === " " && !isAttacking) {
+        setIsAttacking(true);
+        if (socket && currentPlayer) {
+          socket.emit("playerAttack", {
+            x: currentPlayer.x,
+            y: currentPlayer.y,
+            direction: currentPlayer.direction,
+          });
+        }
+        setTimeout(() => setIsAttacking(false), 900);
       }
-      setTimeout(() => setIsAttacking(false), 900);
-    }
-  }, [socket, currentPlayer, isAttacking]);
+    },
+    [socket, currentPlayer, isAttacking]
+  );
 
   const handleKeyUp = useCallback((e) => {
-    setKeys(prev => ({ ...prev, [e.key.toLowerCase()]: false }));
+    setKeys((prev) => ({ ...prev, [e.key.toLowerCase()]: false }));
   }, []);
 
   useEffect(() => {
-    window.addEventListener('keydown', handleKeyDown);
-    window.addEventListener('keyup', handleKeyUp);
+    window.addEventListener("keydown", handleKeyDown);
+    window.addEventListener("keyup", handleKeyUp);
     return () => {
-      window.removeEventListener('keydown', handleKeyDown);
-      window.removeEventListener('keyup', handleKeyUp);
+      window.removeEventListener("keydown", handleKeyDown);
+      window.removeEventListener("keyup", handleKeyUp);
     };
   }, [handleKeyDown, handleKeyUp]);
 
@@ -137,14 +141,14 @@ const MultiplayerGame = () => {
       if (now - lastUpdateRef.current < 16) return;
 
       // Envoyer uniquement l'état des touches au serveur
-      socket.emit('playerUpdate', {
+      socket.emit("playerUpdate", {
         keys: {
-          up: keys['z'] || false,
-          down: keys['s'] || false,
-          left: keys['q'] || false,
-          right: keys['d'] || false
+          up: keys["z"] || false,
+          down: keys["s"] || false,
+          left: keys["q"] || false,
+          right: keys["d"] || false,
         },
-        isAttacking
+        isAttacking,
       });
 
       lastUpdateRef.current = now;
