@@ -75,6 +75,8 @@ jobs:
           key: ${{ secrets.PROD_SSH_KEY }}
           script: |
             cd /home/swords-line-web
+            echo "${{ secrets.FRONTEND_ENV_FILE }}" > ./frontend/.env
+            echo "${{ secrets.BACKEND_ENV_FILE }}" > ./backend/.env
             docker login ghcr.io -u ${{ github.actor }} -p ${{ secrets.CR_PAT }}
             docker compose pull
             docker compose up -d
