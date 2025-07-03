@@ -1,4 +1,4 @@
-name: SwordsLine-Docker-Registry
+name: SwordsLine-Deploy
 
 on:
   push:
@@ -40,3 +40,15 @@ jobs:
         run: |
           docker build ./frontend --file ./frontend/Dockerfile --tag ghcr.io/swords-line-team/swords-line-frontend:${{ steps.vars.outputs.VERSION }}
           docker push ghcr.io/swords-line-team/swords-line-frontend:${{ steps.vars.outputs.VERSION }}
+      - name: Deploy on prod server via SSH
+        uses: appleboy/ssh-action@v0.1.7
+        with:
+          host: ${{ secrets.PROD_HOST }}
+          username: ${{ secrets.PROD_USER }}
+          key: ${{ secrets.PROD_SSH_KEY }}
+          script: |
+            cd /home/swords-line-web
+            docker login ghcr.io -u ${{ github.actor }} -p ${{ secrets.CR_PAT }}
+            docker compose pull
+            docker compose up -d
+
