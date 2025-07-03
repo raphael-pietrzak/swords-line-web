@@ -1,0 +1,43 @@
+name: SwordsLine-CI
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Get project version
+        id: vars
+        run: |
+          # Extrait par exemple la version du package.json, ou utilise le tag git
+          # Ici on prend le tag git si présent, sinon 'latest'
+          if git describe --tags --exact-match > /dev/null 2>&1; then
+            echo "VERSION=$(git describe --tags --exact-match)" >> $GITHUB_OUTPUT
+          else
+            echo "VERSION=latest" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Build and push backend image
+        run: |
+          docker build ./backend --file Dockerfile --tag ghcr.io/${{ github.repository_owner }}/swords-line-backend:${{ steps.vars.outputs.VERSION }}
+          docker push ghcr.io/${{ github.repository_owner }}/swords-line-backend:${{ steps.vars.outputs.VERSION }}
+
+      - name: Build and push frontend image
+        run: |
+          docker build ./frontend --file Dockerfile --tag ghcr.io/${{ github.repository_owner }}/swords-line-frontend:${{ steps.vars.outputs.VERSION }}
+          docker push ghcr.io/${{ github.repository_owner }}/swords-line-frontend:${{ steps.vars.outputs.VERSION }}
