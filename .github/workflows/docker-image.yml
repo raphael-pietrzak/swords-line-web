@@ -34,10 +34,10 @@ jobs:
 
       - name: Build and push backend image
         run: |
-          docker build ./backend --file Dockerfile --tag ghcr.io/${{ github.repository_owner }}/swords-line-backend:${{ steps.vars.outputs.VERSION }}
+          docker build ./backend --file ./backend/Dockerfile --tag ghcr.io/${{ github.repository_owner }}/swords-line-backend:${{ steps.vars.outputs.VERSION }}
           docker push ghcr.io/${{ github.repository_owner }}/swords-line-backend:${{ steps.vars.outputs.VERSION }}
 
       - name: Build and push frontend image
         run: |
-          docker build ./frontend --file Dockerfile --tag ghcr.io/${{ github.repository_owner }}/swords-line-frontend:${{ steps.vars.outputs.VERSION }}
+          docker build ./frontend --file ./frontend/Dockerfile --tag ghcr.io/${{ github.repository_owner }}/swords-line-frontend:${{ steps.vars.outputs.VERSION }}
           docker push ghcr.io/${{ github.repository_owner }}/swords-line-frontend:${{ steps.vars.outputs.VERSION }}
