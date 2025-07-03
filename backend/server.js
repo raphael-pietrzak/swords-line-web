@@ -10,7 +10,7 @@ const server = http.createServer(app);
 // Configuration CORS pour Socket.IO
 const io = socketIo(server, {
   cors: {
-    origin: "frontend:80",
+    origin: "*:80",
     methods: ["GET", "POST"],
     credentials: true,
   },
