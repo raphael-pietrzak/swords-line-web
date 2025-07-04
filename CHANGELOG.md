@@ -1,3 +1,15 @@
+## v0.2.0 (2025-07-04)
+
+### Fix
+
+- **cz.yaml**: update cz
+
+## v0.5.0 (2025-07-04)
+
+### Fix
+
+- **cz.yaml**: update bump version, create changelog
+
 ## v0.1.0 (2025-07-04)
 
 ### Fix
