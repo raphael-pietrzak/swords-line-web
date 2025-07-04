@@ -6,6 +6,7 @@ on:
   workflow_dispatch:
 
 jobs:
+  jobs:
   build-backend:
     runs-on: ubuntu-latest
     outputs:
@@ -13,11 +14,28 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Check for backend changes
+        id: check_backend
+        run: |
+          # Liste des fichiers modifiés par rapport à main (ou HEAD~1)
+          files_changed=$(git diff --name-only origin/main...HEAD)
+
+          echo "Files changed: $files_changed"
+
+          # On vérifie si un fichier backend Dockerfile ou docker-compose.yml est modifié
+          if echo "$files_changed" | grep -E '^backend/|docker-compose.yml'; then
+            echo "build_backend=true" >> $GITHUB_OUTPUT
+          else
+            echo "build_backend=false" >> $GITHUB_OUTPUT
+          fi
+
       - name: Set up Docker Buildx
+        if: steps.check_backend.outputs.build_backend == 'true'
         uses: docker/setup-buildx-action@v2
 
       - name: Get project version
         id: vars
+        if: steps.check_backend.outputs.build_backend == 'true'
         run: |
           if git describe --tags --exact-match > /dev/null 2>&1; then
             echo "VERSION=$(git describe --tags --exact-match)" >> $GITHUB_OUTPUT
@@ -26,6 +44,7 @@ jobs:
           fi
 
       - name: Log in to GitHub Container Registry
+        if: steps.check_backend.outputs.build_backend == 'true'
         uses: docker/login-action@v2
         with:
           registry: ghcr.io
@@ -33,6 +52,7 @@ jobs:
           password: ${{ secrets.CR_PAT }}
 
       - name: Build and push backend image
+        if: steps.check_backend.outputs.build_backend == 'true'
         run: |
           docker build ./backend --file ./backend/Dockerfile --tag ghcr.io/swords-line-team/swords-line-backend:${{ steps.vars.outputs.VERSION }}
           docker push ghcr.io/swords-line-team/swords-line-backend:${{ steps.vars.outputs.VERSION }}
@@ -43,13 +63,27 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Check for frontend changes
+        id: check_frontend
+        run: |
+          files_changed=$(git diff --name-only origin/main...HEAD)
+          echo "Files changed: $files_changed"
+          if echo "$files_changed" | grep -E '^frontend/|docker-compose.yml'; then
+            echo "build_frontend=true" >> $GITHUB_OUTPUT
+          else
+            echo "build_frontend=false" >> $GITHUB_OUTPUT
+          fi
+
       - name: Set up Docker Buildx
+        if: steps.check_frontend.outputs.build_frontend == 'true'
         uses: docker/setup-buildx-action@v2
 
       - name: Get version from previous job
+        if: steps.check_frontend.outputs.build_frontend == 'true'
         run: echo "VERSION=${{ needs.build-backend.outputs.version }}" >> $GITHUB_ENV
 
       - name: Log in to GitHub Container Registry
+        if: steps.check_frontend.outputs.build_frontend == 'true'
         uses: docker/login-action@v2
         with:
           registry: ghcr.io
@@ -57,6 +91,7 @@ jobs:
           password: ${{ secrets.CR_PAT }}
 
       - name: Build and push frontend image
+        if: steps.check_frontend.outputs.build_frontend == 'true'
         run: |
           docker build ./frontend --file ./frontend/Dockerfile --tag ghcr.io/swords-line-team/swords-line-frontend:${{ env.VERSION }}
           docker push ghcr.io/swords-line-team/swords-line-frontend:${{ env.VERSION }}
