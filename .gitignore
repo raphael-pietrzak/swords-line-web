@@ -2,6 +2,6 @@
 .vs_code
 node_modules/
 dist/
-frontend/.env
-backend/.env
+./frontend/.env
+./backend/.env
 .env
