@@ -1,4 +1,4 @@
-## v0.1.0 (2025-07-04)
+## v0.0.1 (2025-07-04)
 
 ### Feat
 
@@ -7,6 +7,11 @@
 ## v0.0.1 (2025-07-04)
 
 ### Feat
+* feat: improve docker container  in https://github.com/swords-line-team/swords-line-web/pull/1
+* Update docker-compose.yml in https://github.com/swords-line-team/swords-line-web/pull/2
+* feat: fix client connect server for prod in https://github.com/swords-line-team/swords-line-web/pull/3
 
-- fix client connect server for prod
-- improve docker container
+## New Contributors
+* @SteveHoareau18 made their first contribution in https://github.com/swords-line-team/swords-line-web/pull/1
+
+**Full Changelog**: https://github.com/swords-line-team/swords-line-web/commits/v0.0.1
