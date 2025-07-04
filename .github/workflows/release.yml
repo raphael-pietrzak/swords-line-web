@@ -21,7 +21,7 @@ jobs:
         run: uv tool install commitizen
 
       - name: Bump version and generate changelog
-        run: uv run commitizen bump
+        run: cz bump
 
       - name: Commit version bump and push tags
         run: |
