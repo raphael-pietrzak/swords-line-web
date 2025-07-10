@@ -10,18 +10,15 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       version: ${{ steps.vars.outputs.VERSION }}
+      build_backend: ${{ steps.check_backend.outputs.build_backend }}
     steps:
       - uses: actions/checkout@v4
 
       - name: Check for backend changes
         id: check_backend
         run: |
-          # Liste des fichiers modifiés par rapport à main (ou HEAD~1)
           files_changed=$(git diff --name-only origin/main...HEAD)
-
           echo "Files changed: $files_changed"
-
-          # On vérifie si un fichier backend Dockerfile ou docker-compose.yml est modifié
           if echo "$files_changed" | grep -E '^backend/|docker-compose.yml'; then
             echo "build_backend=true" >> $GITHUB_OUTPUT
           else
@@ -59,6 +56,8 @@ jobs:
   build-frontend:
     runs-on: ubuntu-latest
     needs: build-backend
+    outputs:
+      build_frontend: ${{ steps.check_frontend.outputs.build_frontend }}
     steps:
       - uses: actions/checkout@v4
 
@@ -97,7 +96,8 @@ jobs:
 
   deploy:
     runs-on: ubuntu-latest
-    if: github.event_name == 'workflow_dispatch'  # <-- ne s’exécute que sur déclenchement manuel
+    needs: [build-backend, build-frontend]
+    if: github.event_name == 'workflow_dispatch'
     steps:
       - name: Deploy on prod server via SSH
         uses: appleboy/ssh-action@v0.1.7
@@ -106,7 +106,7 @@ jobs:
           username: ${{ secrets.PROD_USER }}
           key: ${{ secrets.PROD_SSH_KEY }}
           script: |
-            cd /home/swords-line-web
+            cd /home/debian/swords-line-web
             echo "${{ secrets.FRONTEND_ENV_FILE }}" > ./frontend/.env
             echo "${{ secrets.BACKEND_ENV_FILE }}" > ./backend/.env
             docker login ghcr.io -u ${{ github.actor }} -p ${{ secrets.CR_PAT }}
